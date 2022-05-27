@@ -1,6 +1,8 @@
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
+import Feed from "../components/Feed";
+import Navbar from "../components/Navbar";
 
 const Home: NextPage = () => {
   return (
@@ -11,11 +13,8 @@ const Home: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="text-center bg-black h-screen">
-        <h1 className="py-5 font-extrabold text-transparent text-8xl bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
-          Instagram clone!
-        </h1>
-      </main>
+      <Navbar />
+      <Feed />
     </div>
   );
 };
