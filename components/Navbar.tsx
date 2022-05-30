@@ -14,7 +14,7 @@ const Navbar = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <header className="border-b sticky top-0 bg-white z-10">
+    <header className="border-b sticky top-0 bg-white z-50">
       <div className="flex justify-between items-center px-6 max-w-5xl mx-auto">
         {/* Logo */}
         <Link href="/">
