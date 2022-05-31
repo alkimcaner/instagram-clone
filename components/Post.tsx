@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from "react";
 import Image from "next/image";
 import { Menu, Transition } from "@headlessui/react";
-import Comments from "./CommentsDialog";
+import Comments from "./CommentsModal";
 //Icons
 import {
   FaRegHeart,

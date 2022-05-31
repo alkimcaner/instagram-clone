@@ -14,7 +14,7 @@ const Comment = () => {
             objectFit="cover"
           />
         </div>
-        <h1 className="font-semibold">flawn</h1>
+        <h1 className="font-semibold text-sm">flawn</h1>
       </div>
 
       <p className="break-all text-sm mt-2">
