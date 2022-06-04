@@ -6,8 +6,7 @@ import { Menu, Transition } from "@headlessui/react";
 //Icons
 import { FaRegHeart } from "react-icons/fa";
 import { CgProfile } from "react-icons/cg";
-import { BsPlusSquare } from "react-icons/bs";
-import { AiOutlineHome } from "react-icons/ai";
+import { BsPlusCircle, BsHouseDoor } from "react-icons/bs";
 import { MdLogout } from "react-icons/md";
 import UploadModal from "./UploadModal";
 
@@ -38,14 +37,14 @@ const Navbar = () => {
         <nav className="flex-1 ml-8 flex justify-end items-center gap-5 text-2xl">
           <Link href="/">
             <div>
-              <AiOutlineHome className="cursor-pointer" />
+              <BsHouseDoor className="cursor-pointer" />
             </div>
           </Link>
           {session && (
             <>
               <button onClick={() => setUploadVisible(true)}>
                 <div>
-                  <BsPlusSquare />
+                  <BsPlusCircle />
                 </div>
               </button>
               <Link href="/">
@@ -62,7 +61,18 @@ const Navbar = () => {
             className="relative inline-flex flex-col items-center text-left z-10"
           >
             <Menu.Button>
-              <CgProfile />
+              {session ? (
+                <div className="relative w-7 h-7 rounded-full overflow-hidden select-none">
+                  <Image
+                    src={session?.user?.image || ""}
+                    alt=""
+                    layout="fill"
+                    objectFit="cover"
+                  />
+                </div>
+              ) : (
+                <CgProfile />
+              )}
             </Menu.Button>
             <Transition
               as={Fragment}

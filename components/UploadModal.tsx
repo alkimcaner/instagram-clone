@@ -1,7 +1,7 @@
-import React, { Fragment, useRef } from "react";
+import React, { Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 
-interface UploadModalProps {
+interface IUploadModalProps {
   isUploadVisible: boolean;
   setUploadVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -9,8 +9,14 @@ interface UploadModalProps {
 const UploadModal = ({
   isUploadVisible,
   setUploadVisible,
-}: UploadModalProps) => {
+}: IUploadModalProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File>();
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFile(event.target.files?.[0]);
+    console.log(event.target.files?.[0]);
+  };
 
   return (
     <Transition appear show={isUploadVisible} as={Fragment}>
@@ -61,7 +67,13 @@ const UploadModal = ({
                   }}
                 >
                   {/* File Input */}
-                  <input type="file" hidden ref={fileInputRef} required />
+                  <input
+                    type="file"
+                    hidden
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    required
+                  />
                   <button
                     type="button"
                     className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 transition"

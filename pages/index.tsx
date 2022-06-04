@@ -2,8 +2,51 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Feed from "../components/Feed";
 import Navbar from "../components/Navbar";
+import { db } from "../firebase";
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  Timestamp,
+} from "firebase/firestore";
+import { useEffect, useState } from "react";
 
-const Home: NextPage = () => {
+export interface PostType {
+  caption: string;
+  comments: {
+    comment: string;
+    createdAt: Timestamp;
+    name: string;
+    userPhoto: string;
+  }[];
+  createdAt: Timestamp;
+  email: string;
+  image: string;
+  name: string;
+  userPhoto: string;
+}
+
+export async function getServerSideProps() {
+  const postsSnapshot = await getDocs(
+    query(collection(db, "posts"), orderBy("createdAt", "desc"))
+  );
+  const postsArray = postsSnapshot.docs.map((doc) => {
+    return { ...JSON.parse(JSON.stringify(doc.data())), id: doc.id };
+  });
+
+  return {
+    props: { postsData: postsArray },
+  };
+}
+
+const Home: NextPage = ({ postsData }: any) => {
+  const [posts, setPosts] = useState<PostType[]>([]);
+
+  useEffect(() => {
+    setPosts(postsData);
+  }, [postsData]);
+
   return (
     <div>
       <Head>
@@ -13,7 +56,7 @@ const Home: NextPage = () => {
       </Head>
 
       <Navbar />
-      <Feed />
+      <Feed posts={posts} />
     </div>
   );
 };
