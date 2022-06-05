@@ -2,9 +2,9 @@ import React from "react";
 import Post from "./Post";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { PostType } from "../pages";
+import { IPost } from "../pages";
 
-const Feed = ({ posts }: { posts: PostType[] }) => {
+const Feed = ({ posts }: { posts: IPost[] }) => {
   const { data: session } = useSession();
 
   return (
@@ -18,14 +18,16 @@ const Feed = ({ posts }: { posts: PostType[] }) => {
         {session && (
           <div className="flex items-center gap-2 fixed top-24">
             <div className="rounded-full overflow-hidden relative w-12 h-12">
-              <Image
-                src={session?.user?.image || ""}
-                alt=""
-                layout="fill"
-                objectFit="cover"
-              />
+              {session?.user?.image && (
+                <Image
+                  src={session?.user?.image}
+                  alt=""
+                  layout="fill"
+                  objectFit="cover"
+                />
+              )}
             </div>
-            <h1 className="font-semibold">flawn</h1>
+            <h1 className="font-semibold">{session?.user?.name}</h1>
           </div>
         )}
       </section>

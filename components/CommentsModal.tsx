@@ -3,12 +3,12 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Dialog, Transition } from "@headlessui/react";
 import Comment from "./Comment";
-import { PostType } from "../pages";
+import { IPost } from "../pages";
 
 interface ICommentsModalProps {
   isCommentsVisible: boolean;
   setCommentsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  post: PostType;
+  post: IPost;
 }
 
 const CommentsModal = ({
@@ -58,12 +58,14 @@ const CommentsModal = ({
                 <div className="flex flex-col flex-1 gap-2">
                   {/* Image */}
                   <div className="relative w-full aspect-video">
-                    <Image
-                      src={post.image}
-                      alt=""
-                      layout="fill"
-                      objectFit="contain"
-                    />
+                    {post.image && (
+                      <Image
+                        src={post.image}
+                        alt=""
+                        layout="fill"
+                        objectFit="contain"
+                      />
+                    )}
                   </div>
                   {/* Write comment */}
                   {session && (
@@ -86,7 +88,7 @@ const CommentsModal = ({
                   )}
 
                   {/* Comments */}
-                  <div className="h-[10rem] text-left overflow-y-scroll flex flex-col gap-4 divide-y">
+                  <div className="max-h-[10rem] text-left overflow-y-scroll flex flex-col gap-4 divide-y">
                     {post.comments.map((comment) => (
                       <Comment key={Math.random()} comment={comment} />
                     ))}

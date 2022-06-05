@@ -12,7 +12,8 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
-export interface PostType {
+export interface IPost {
+  id?: string;
   caption: string;
   comments: {
     comment: string;
@@ -20,6 +21,7 @@ export interface PostType {
     name: string;
     userPhoto: string;
   }[];
+  likes: string[];
   createdAt: Timestamp;
   email: string;
   image: string;
@@ -41,7 +43,7 @@ export async function getServerSideProps() {
 }
 
 const Home: NextPage = ({ postsData }: any) => {
-  const [posts, setPosts] = useState<PostType[]>([]);
+  const [posts, setPosts] = useState<IPost[]>([]);
 
   useEffect(() => {
     setPosts(postsData);

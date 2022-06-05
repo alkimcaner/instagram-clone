@@ -1,9 +1,9 @@
 import React from "react";
 import Image from "next/image";
 import TimeAgo from "react-timeago";
-import { PostType } from "../pages";
+import { IPost } from "../pages";
 
-const Comment = ({ comment }: { comment: PostType["comments"][number] }) => {
+const Comment = ({ comment }: { comment: IPost["comments"][number] }) => {
   return (
     <div>
       {/* Profile photo */}

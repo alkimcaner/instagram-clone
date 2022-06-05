@@ -1,5 +1,17 @@
 import React, { Fragment, useRef, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import { db, storage } from "../firebase";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { IPost } from "../pages";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
 
 interface IUploadModalProps {
   isUploadVisible: boolean;
@@ -10,12 +22,40 @@ const UploadModal = ({
   isUploadVisible,
   setUploadVisible,
 }: IUploadModalProps) => {
+  const { data: session } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [file, setFile] = useState<File>();
+  const captionRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [file, setFile] = useState<File | null>();
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFile(event.target.files?.[0]);
-    console.log(event.target.files?.[0]);
+  const handleUpload = async () => {
+    if (!session || !file || !captionRef.current?.value) return;
+    setIsUploading(true);
+
+    const post: IPost = {
+      caption: captionRef.current?.value || "",
+      comments: [],
+      likes: [],
+      createdAt: Timestamp.now(),
+      email: session?.user?.email || "",
+      image: "",
+      name: session?.user?.name || "",
+      userPhoto: session?.user?.image || "",
+    };
+
+    // Upload post to firestore
+    const postsRef = collection(db, "posts");
+    const postDoc = await addDoc(postsRef, post);
+
+    //Upload image to storage
+    const storageRef = ref(storage, `posts/${postDoc.id}`);
+    const uploadTask = await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+
+    // Update post with image url
+    await updateDoc(doc(db, "posts", postDoc.id), { image: downloadURL });
+
+    location.reload();
   };
 
   return (
@@ -23,7 +63,10 @@ const UploadModal = ({
       <Dialog
         as="div"
         className="relative z-20"
-        onClose={() => setUploadVisible(false)}
+        onClose={() => {
+          setFile(null);
+          setUploadVisible(false);
+        }}
       >
         <Transition.Child
           as={Fragment}
@@ -56,14 +99,25 @@ const UploadModal = ({
                   Create new post
                 </Dialog.Title>
                 <div className="mt-4">
-                  <p className="text-sm text-gray-500">Upload photo</p>
+                  <p className="text-sm text-gray-500">Upload image</p>
                 </div>
+
+                {file && (
+                  <div className="mt-4 relative w-full aspect-video">
+                    <Image
+                      src={URL.createObjectURL(file)}
+                      alt=""
+                      layout="fill"
+                      objectFit="contain"
+                    />
+                  </div>
+                )}
 
                 <form
                   className="mt-2"
                   onSubmit={(event) => {
                     event.preventDefault();
-                    setUploadVisible(false);
+                    handleUpload();
                   }}
                 >
                   {/* File Input */}
@@ -71,8 +125,7 @@ const UploadModal = ({
                     type="file"
                     hidden
                     ref={fileInputRef}
-                    onChange={handleFileChange}
-                    required
+                    onChange={(event) => setFile(event.target.files?.[0])}
                   />
                   <button
                     type="button"
@@ -88,18 +141,22 @@ const UploadModal = ({
                       type="text"
                       placeholder="Write a caption..."
                       className="block mx-auto mt-2 text-center outline-none rounded-sm p-1 focus-visible:ring-2 focus-visible:ring-blue-200"
-                      required
+                      ref={captionRef}
                     />
                   </div>
 
                   {/* Post */}
-                  <div>
-                    <input
-                      type="submit"
-                      className="mx-auto mt-2 flex justify-center rounded-md border border-transparent bg-red-300 px-4 py-2 text-sm font-medium text-white hover:bg-red-400 focus:outline-none transition cursor-pointer"
-                      value="Post"
-                    />
-                  </div>
+                  {!isUploading ? (
+                    <div>
+                      <input
+                        type="submit"
+                        className="mx-auto mt-2 flex justify-center rounded-md border border-transparent bg-red-300 px-4 py-2 text-sm font-medium text-white hover:bg-red-400 focus:outline-none transition cursor-pointer"
+                        value="Post"
+                      />
+                    </div>
+                  ) : (
+                    <div className="font-semibold mt-2">Uploading...</div>
+                  )}
                 </form>
               </Dialog.Panel>
             </Transition.Child>

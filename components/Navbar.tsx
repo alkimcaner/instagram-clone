@@ -35,6 +35,7 @@ const Navbar = () => {
 
         {/* Navigation */}
         <nav className="flex-1 ml-8 flex justify-end items-center gap-5 text-2xl">
+          {/* Home */}
           <Link href="/">
             <div>
               <BsHouseDoor className="cursor-pointer" />
@@ -42,11 +43,13 @@ const Navbar = () => {
           </Link>
           {session && (
             <>
+              {/* Post */}
               <button onClick={() => setUploadVisible(true)}>
                 <div>
                   <BsPlusCircle />
                 </div>
               </button>
+              {/* Likes */}
               <Link href="/">
                 <div>
                   <FaRegHeart className="cursor-pointer" />
@@ -63,12 +66,14 @@ const Navbar = () => {
             <Menu.Button>
               {session ? (
                 <div className="relative w-7 h-7 rounded-full overflow-hidden select-none">
-                  <Image
-                    src={session?.user?.image || ""}
-                    alt=""
-                    layout="fill"
-                    objectFit="cover"
-                  />
+                  {session?.user?.image && (
+                    <Image
+                      src={session?.user?.image}
+                      alt=""
+                      layout="fill"
+                      objectFit="cover"
+                    />
+                  )}
                 </div>
               ) : (
                 <CgProfile />

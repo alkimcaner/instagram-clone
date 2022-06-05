@@ -1,9 +1,13 @@
 import React, { Fragment, useState } from "react";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { db, storage } from "../firebase";
+import { doc, deleteDoc } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
 import { Menu, Transition } from "@headlessui/react";
 import TimeAgo from "react-timeago";
 import CommentsModal from "./CommentsModal";
-import { PostType } from "../pages";
+import { IPost } from "../pages";
 //Icons
 import {
   FaRegHeart,
@@ -12,18 +16,33 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { RiMoreFill } from "react-icons/ri";
-import { useSession } from "next-auth/react";
 
-const Post = ({ post }: { post: PostType }) => {
+const Post = ({ post }: { post: IPost }) => {
   const [isCommentsVisible, setCommentsVisible] = useState(false);
   const { data: session } = useSession();
+
+  const handleDeletePost = async () => {
+    if (post.id && session && session?.user?.email === post.email) {
+      const postRef = doc(db, "posts", post.id);
+      const storageRef = ref(storage, `posts/${post.id}`);
+      await Promise.all([deleteDoc(postRef), deleteObject(storageRef)]);
+      location.reload();
+    }
+  };
 
   return (
     <div className="bg-white border rounded-md mb-4">
       <div className="p-4 flex items-center gap-4">
         {/* Profile photo */}
         <div className="rounded-full overflow-hidden relative w-8 h-8">
-          <Image src={post.userPhoto} alt="" layout="fill" objectFit="cover" />
+          {post.userPhoto && (
+            <Image
+              src={post.userPhoto}
+              alt=""
+              layout="fill"
+              objectFit="cover"
+            />
+          )}
         </div>
         {/* Username */}
         <p className="font-medium">{post.name}</p>
@@ -48,7 +67,10 @@ const Post = ({ post }: { post: PostType }) => {
               >
                 <Menu.Items className="absolute right-0 mt-8 w-48 overflow-hidden text-base origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                   <Menu.Item>
-                    <div className="p-2 cursor-pointer hover:bg-gray-50 w-full text-left text-red-600 flex items-center gap-2">
+                    <div
+                      onClick={handleDeletePost}
+                      className="p-2 cursor-pointer hover:bg-gray-50 w-full text-left text-red-600 flex items-center gap-2"
+                    >
                       <FaTrash /> Delete post
                     </div>
                   </Menu.Item>
@@ -60,7 +82,9 @@ const Post = ({ post }: { post: PostType }) => {
       </div>
       {/* Image */}
       <div className="relative h-[32rem]">
-        <Image src={post.image} alt="" layout="fill" objectFit="cover" />
+        {post.image && (
+          <Image src={post.image} alt="" layout="fill" objectFit="cover" />
+        )}
       </div>
       <div className="p-4 flex flex-col gap-2">
         {/* Action buttons */}
