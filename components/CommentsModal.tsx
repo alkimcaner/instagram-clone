@@ -1,9 +1,11 @@
-import React, { Fragment } from "react";
+import React, { FormEvent, Fragment, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Dialog, Transition } from "@headlessui/react";
 import Comment from "./Comment";
 import { IPost } from "../pages";
+import { doc, Timestamp, updateDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
 interface ICommentsModalProps {
   isCommentsVisible: boolean;
@@ -17,6 +19,31 @@ const CommentsModal = ({
   post,
 }: ICommentsModalProps) => {
   const { data: session } = useSession();
+  const commentRef = useRef<HTMLInputElement>(null);
+  const [comments, setComments] = useState<IPost["comments"]>([]);
+
+  const handleComment = async (event: FormEvent) => {
+    event.preventDefault();
+    if (commentRef.current?.value === "") return;
+
+    const comment: IPost["comments"][number] = {
+      comment: commentRef.current?.value || "",
+      createdAt: Timestamp.now(),
+      name: session?.user?.name || "",
+      userPhoto: session?.user?.image || "",
+    };
+
+    setComments(() => [...post.comments, comment]);
+
+    if (!post.id) return;
+    await updateDoc(doc(db, "posts", post.id), {
+      comments: [...post.comments, comment],
+    });
+  };
+
+  useEffect(() => {
+    setComments(post.comments);
+  }, []);
 
   return (
     <Transition appear show={isCommentsVisible} as={Fragment}>
@@ -69,14 +96,12 @@ const CommentsModal = ({
                   </div>
                   {/* Write comment */}
                   {session && (
-                    <form
-                      className="flex gap-2"
-                      onSubmit={(event) => event.preventDefault()}
-                    >
+                    <form className="flex gap-2" onSubmit={handleComment}>
                       <input
                         type="text"
                         placeholder="Write a comment"
                         className="p-2 outline-none ring-1 rounded-md w-full"
+                        ref={commentRef}
                         required
                       />
                       <input
@@ -89,9 +114,13 @@ const CommentsModal = ({
 
                   {/* Comments */}
                   <div className="max-h-[10rem] text-left overflow-y-scroll flex flex-col gap-4 divide-y">
-                    {post.comments.map((comment) => (
-                      <Comment key={Math.random()} comment={comment} />
-                    ))}
+                    {comments
+                      .sort((a, b) =>
+                        a.createdAt.seconds < b.createdAt.seconds ? 1 : -1
+                      )
+                      .map((comment) => (
+                        <Comment key={Math.random()} comment={comment} />
+                      ))}
                   </div>
                 </div>
               </Dialog.Panel>

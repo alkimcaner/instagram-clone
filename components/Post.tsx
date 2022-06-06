@@ -1,25 +1,24 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { db, storage } from "../firebase";
-import { doc, deleteDoc } from "firebase/firestore";
-import { deleteObject, ref } from "firebase/storage";
 import { Menu, Transition } from "@headlessui/react";
 import TimeAgo from "react-timeago";
 import CommentsModal from "./CommentsModal";
 import { IPost } from "../pages";
+//Firebase
+import { db, storage } from "../firebase";
+import { doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { deleteObject, ref } from "firebase/storage";
 //Icons
-import {
-  FaRegHeart,
-  FaRegComment,
-  FaPaperPlane,
-  FaTrash,
-} from "react-icons/fa";
+import { FaRegComment, FaPaperPlane, FaTrash } from "react-icons/fa";
 import { RiMoreFill } from "react-icons/ri";
+import { FcLikePlaceholder, FcLike } from "react-icons/fc";
 
 const Post = ({ post }: { post: IPost }) => {
-  const [isCommentsVisible, setCommentsVisible] = useState(false);
   const { data: session } = useSession();
+  const [isCommentsVisible, setCommentsVisible] = useState(false);
+  const [isLike, setLike] = useState(false);
+  const isStillLike = useRef(false);
 
   const handleDeletePost = async () => {
     if (post.id && session && session?.user?.email === post.email) {
@@ -29,6 +28,28 @@ const Post = ({ post }: { post: IPost }) => {
       location.reload();
     }
   };
+
+  const handleLike = async () => {
+    if (post.id && session && !isStillLike.current) {
+      isStillLike.current = true;
+
+      const postRef = doc(db, "posts", post.id);
+      const likes = post.likes.filter((like) => like !== session?.user?.email);
+
+      if (likes.length === post.likes.length && !isLike) {
+        likes.push(session?.user?.email || "");
+      }
+      await updateDoc(postRef, { likes });
+      setLike((currentValue) => !currentValue);
+      post.likes = likes;
+
+      isStillLike.current = false;
+    }
+  };
+
+  useEffect(() => {
+    setLike(post.likes.includes(session?.user?.email || "") ? true : false);
+  }, []);
 
   return (
     <div className="bg-white border rounded-md mb-4">
@@ -88,12 +109,21 @@ const Post = ({ post }: { post: IPost }) => {
       </div>
       <div className="p-4 flex flex-col gap-2">
         {/* Action buttons */}
-        <div className="flex items-center gap-6 text-xl mb-2">
-          <FaRegHeart className="cursor-pointer" />
-          <FaRegComment
-            className="cursor-pointer"
+        <div className="flex items-center gap-6 text-xl mb-2 select-none">
+          <div
+            onClick={handleLike}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            {isLike ? <FcLike /> : <FcLikePlaceholder />}
+            {post.likes.length}
+          </div>
+          <div
             onClick={() => setCommentsVisible(true)}
-          />
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <FaRegComment />
+            {post.comments.length}
+          </div>
           <FaPaperPlane className="cursor-pointer" />
         </div>
         {/* Description */}
