@@ -33,6 +33,7 @@ const UploadModal = ({
     setIsUploading(true);
 
     const post: IPost = {
+      id: "",
       caption: captionRef.current?.value || "",
       comments: [],
       likes: [],
@@ -53,7 +54,10 @@ const UploadModal = ({
     const downloadURL = await getDownloadURL(storageRef);
 
     // Update post with image url
-    await updateDoc(doc(db, "posts", postDoc.id), { image: downloadURL });
+    await updateDoc(doc(db, "posts", postDoc.id), {
+      image: downloadURL,
+      id: postDoc.id,
+    });
 
     location.reload();
   };

@@ -6,13 +6,15 @@ import Comment from "./Comment";
 import { IPost } from "../pages";
 import { Timestamp } from "firebase/firestore";
 import { IPostReducer } from "../postReducer";
+import { v4 } from "uuid";
 
-interface ICommentsModalProps {
+const CommentsModal = ({
+  postState,
+  dispatch,
+}: {
   postState: IPostReducer;
   dispatch: React.Dispatch<any>;
-}
-
-const CommentsModal = ({ postState, dispatch }: ICommentsModalProps) => {
+}) => {
   const { data: session } = useSession();
   const commentRef = useRef<HTMLInputElement>(null);
 
@@ -25,6 +27,8 @@ const CommentsModal = ({ postState, dispatch }: ICommentsModalProps) => {
       createdAt: Timestamp.now(),
       name: session?.user?.name || "",
       userPhoto: session?.user?.image || "",
+      email: session?.user?.email || "",
+      id: v4(),
     };
 
     dispatch({
@@ -32,7 +36,9 @@ const CommentsModal = ({ postState, dispatch }: ICommentsModalProps) => {
       payload: [...postState.post.comments, comment],
     });
 
-    commentRef.current.value = "";
+    if (commentRef.current) {
+      commentRef.current.value = "";
+    }
   };
 
   return (
@@ -109,7 +115,11 @@ const CommentsModal = ({ postState, dispatch }: ICommentsModalProps) => {
                         a.createdAt.seconds < b.createdAt.seconds ? 1 : -1
                       )
                       .map((comment) => (
-                        <Comment key={Math.random()} comment={comment} />
+                        <Comment
+                          key={v4()}
+                          comment={comment}
+                          dispatch={dispatch}
+                        />
                       ))}
                   </div>
                 </div>

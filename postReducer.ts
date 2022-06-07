@@ -8,6 +8,8 @@ export interface IPostReducer {
 }
 
 export const postReducer = (state: IPostReducer, action: any): IPostReducer => {
+  const postRef = doc(db, "posts", state.post.id);
+
   switch (action.type) {
     case "SET_POST":
       return {
@@ -23,8 +25,23 @@ export const postReducer = (state: IPostReducer, action: any): IPostReducer => {
         ...state,
         post: { ...state.post, comments: action.payload },
       };
+    case "DELETE_COMMENT":
+      updateDoc(postRef, {
+        comments: state.post.comments.filter(
+          (comment) => comment.id !== action.payload
+        ),
+      });
+
+      return {
+        ...state,
+        post: {
+          ...state.post,
+          comments: state.post.comments.filter(
+            (comment) => comment.id !== action.payload
+          ),
+        },
+      };
     case "TOGGLE_LIKE":
-      const postRef = doc(db, "posts", state.post.id);
       const likes = state.post.likes.filter(
         (like) => like !== action.payload?.user?.email
       );

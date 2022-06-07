@@ -10,7 +10,7 @@ import {
   orderBy,
   Timestamp,
 } from "firebase/firestore";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export interface IPost {
   id: string;
@@ -20,6 +20,8 @@ export interface IPost {
     createdAt: Timestamp;
     name: string;
     userPhoto: string;
+    email: string;
+    id: string;
   }[];
   likes: string[];
   createdAt: Timestamp;
@@ -34,7 +36,7 @@ export async function getServerSideProps() {
     query(collection(db, "posts"), orderBy("createdAt", "desc"))
   );
   const postsArray = postsSnapshot.docs.map((doc) => {
-    return { ...JSON.parse(JSON.stringify(doc.data())), id: doc.id };
+    return JSON.parse(JSON.stringify(doc.data()));
   });
 
   return {
@@ -43,11 +45,7 @@ export async function getServerSideProps() {
 }
 
 const Home: NextPage = ({ postsData }: any) => {
-  const [posts, setPosts] = useState<IPost[]>([]);
-
-  useEffect(() => {
-    setPosts(postsData);
-  }, [postsData]);
+  const [posts, setPosts] = useState<IPost[]>(postsData);
 
   return (
     <div>
