@@ -1,13 +1,14 @@
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useReducer, useRef } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Menu, Transition } from "@headlessui/react";
 import TimeAgo from "react-timeago";
 import CommentsModal from "./CommentsModal";
 import { IPost } from "../pages";
+import { postReducer } from "../postReducer";
 //Firebase
 import { db, storage } from "../firebase";
-import { doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { doc, deleteDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
 //Icons
 import { FaRegComment, FaPaperPlane, FaTrash } from "react-icons/fa";
@@ -16,49 +17,41 @@ import { FcLikePlaceholder, FcLike } from "react-icons/fc";
 
 const Post = ({ post }: { post: IPost }) => {
   const { data: session } = useSession();
-  const [isCommentsVisible, setCommentsVisible] = useState(false);
-  const [isLike, setLike] = useState(false);
   const isStillLike = useRef(false);
+  const [postState, dispatch] = useReducer(postReducer, {
+    post: post,
+    isCommentsVisible: false,
+  });
 
   const handleDeletePost = async () => {
-    if (post.id && session && session?.user?.email === post.email) {
-      const postRef = doc(db, "posts", post.id);
-      const storageRef = ref(storage, `posts/${post.id}`);
+    if (
+      postState.post.id &&
+      session &&
+      session?.user?.email === postState.post.email
+    ) {
+      const postRef = doc(db, "posts", postState.post.id);
+      const storageRef = ref(storage, `posts/${postState.post.id}`);
       await Promise.all([deleteDoc(postRef), deleteObject(storageRef)]);
       location.reload();
     }
   };
 
-  const handleLike = async () => {
-    if (post.id && session && !isStillLike.current) {
+  const handleLike = () => {
+    if (session && !isStillLike.current) {
       isStillLike.current = true;
-
-      const postRef = doc(db, "posts", post.id);
-      const likes = post.likes.filter((like) => like !== session?.user?.email);
-
-      if (likes.length === post.likes.length && !isLike) {
-        likes.push(session?.user?.email || "");
-      }
-      await updateDoc(postRef, { likes });
-      setLike((currentValue) => !currentValue);
-      post.likes = likes;
-
+      dispatch({ type: "TOGGLE_LIKE", payload: session });
       isStillLike.current = false;
     }
   };
-
-  useEffect(() => {
-    setLike(post.likes.includes(session?.user?.email || "") ? true : false);
-  }, []);
 
   return (
     <div className="bg-white border rounded-md mb-4">
       <div className="p-4 flex items-center gap-4">
         {/* Profile photo */}
         <div className="rounded-full overflow-hidden relative w-8 h-8">
-          {post.userPhoto && (
+          {postState.post.userPhoto && (
             <Image
-              src={post.userPhoto}
+              src={postState.post.userPhoto}
               alt=""
               layout="fill"
               objectFit="cover"
@@ -66,9 +59,9 @@ const Post = ({ post }: { post: IPost }) => {
           )}
         </div>
         {/* Username */}
-        <p className="font-medium">{post.name}</p>
+        <p className="font-medium">{postState.post.name}</p>
         {/* More */}
-        {session && session?.user?.email === post.email && (
+        {session && session?.user?.email === postState.post.email && (
           <div className="ml-auto cursor-pointer text-xl z-10">
             <Menu
               as="div"
@@ -103,8 +96,13 @@ const Post = ({ post }: { post: IPost }) => {
       </div>
       {/* Image */}
       <div className="relative h-[32rem]">
-        {post.image && (
-          <Image src={post.image} alt="" layout="fill" objectFit="cover" />
+        {postState.post.image && (
+          <Image
+            src={postState.post.image}
+            alt=""
+            layout="fill"
+            objectFit="cover"
+          />
         )}
       </div>
       <div className="p-4 flex flex-col gap-2">
@@ -114,38 +112,40 @@ const Post = ({ post }: { post: IPost }) => {
             onClick={handleLike}
             className="flex items-center gap-2 cursor-pointer"
           >
-            {isLike ? <FcLike /> : <FcLikePlaceholder />}
-            {post.likes.length}
+            {postState.post.likes.includes(session?.user?.email || "") ? (
+              <FcLike />
+            ) : (
+              <FcLikePlaceholder />
+            )}
+            {postState.post.likes.length}
           </div>
           <div
-            onClick={() => setCommentsVisible(true)}
+            onClick={() => dispatch({ type: "SET_COMMENTS_VISIBLE" })}
             className="flex items-center gap-2 cursor-pointer"
           >
             <FaRegComment />
-            {post.comments.length}
+            {postState.post.comments.length}
           </div>
           <FaPaperPlane className="cursor-pointer" />
         </div>
         {/* Description */}
         <div className="text-sm">
-          <span className="font-semibold">{post.name}</span>{" "}
-          <span className="">{post.caption}</span>
+          <span className="font-semibold">{postState.post.name}</span>{" "}
+          <span className="">{postState.post.caption}</span>
         </div>
-        <button onClick={() => setCommentsVisible(true)}>
+        <button onClick={() => dispatch({ type: "SET_COMMENTS_VISIBLE" })}>
           <div className="text-sm text-left font-light text-gray-500 cursor-pointer">
             View all comments
           </div>
         </button>
         <div className="text-xs text-gray-500 font-thin">
-          <TimeAgo date={post.createdAt?.seconds * 1000 || Date.now()} />
+          <TimeAgo
+            date={postState.post.createdAt?.seconds * 1000 || Date.now()}
+          />
         </div>
       </div>
       {/* Comments */}
-      <CommentsModal
-        isCommentsVisible={isCommentsVisible}
-        setCommentsVisible={setCommentsVisible}
-        post={post}
-      />
+      <CommentsModal postState={postState} dispatch={dispatch} />
     </div>
   );
 };

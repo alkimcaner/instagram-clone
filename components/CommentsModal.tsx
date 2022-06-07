@@ -1,28 +1,22 @@
-import React, { FormEvent, Fragment, useEffect, useRef, useState } from "react";
+import React, { FormEvent, Fragment, useRef } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Dialog, Transition } from "@headlessui/react";
 import Comment from "./Comment";
 import { IPost } from "../pages";
-import { doc, Timestamp, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { Timestamp } from "firebase/firestore";
+import { IPostReducer } from "../postReducer";
 
 interface ICommentsModalProps {
-  isCommentsVisible: boolean;
-  setCommentsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  post: IPost;
+  postState: IPostReducer;
+  dispatch: React.Dispatch<any>;
 }
 
-const CommentsModal = ({
-  isCommentsVisible,
-  setCommentsVisible,
-  post,
-}: ICommentsModalProps) => {
+const CommentsModal = ({ postState, dispatch }: ICommentsModalProps) => {
   const { data: session } = useSession();
   const commentRef = useRef<HTMLInputElement>(null);
-  const [comments, setComments] = useState<IPost["comments"]>([]);
 
-  const handleComment = async (event: FormEvent) => {
+  const handleComment = (event: FormEvent) => {
     event.preventDefault();
     if (commentRef.current?.value === "") return;
 
@@ -33,24 +27,20 @@ const CommentsModal = ({
       userPhoto: session?.user?.image || "",
     };
 
-    setComments(() => [...post.comments, comment]);
-
-    if (!post.id) return;
-    await updateDoc(doc(db, "posts", post.id), {
-      comments: [...post.comments, comment],
+    dispatch({
+      type: "SET_COMMENTS",
+      payload: [...postState.post.comments, comment],
     });
+
+    commentRef.current.value = "";
   };
 
-  useEffect(() => {
-    setComments(post.comments);
-  }, []);
-
   return (
-    <Transition appear show={isCommentsVisible} as={Fragment}>
+    <Transition appear show={postState.isCommentsVisible} as={Fragment}>
       <Dialog
         as="div"
         className="relative z-20"
-        onClose={() => setCommentsVisible(false)}
+        onClose={() => dispatch({ type: "SET_COMMENTS_HIDDEN" })}
       >
         <Transition.Child
           as={Fragment}
@@ -85,9 +75,9 @@ const CommentsModal = ({
                 <div className="flex flex-col flex-1 gap-2">
                   {/* Image */}
                   <div className="relative w-full aspect-video">
-                    {post.image && (
+                    {postState.post.image && (
                       <Image
-                        src={post.image}
+                        src={postState.post.image}
                         alt=""
                         layout="fill"
                         objectFit="contain"
@@ -114,7 +104,7 @@ const CommentsModal = ({
 
                   {/* Comments */}
                   <div className="max-h-[10rem] text-left overflow-y-scroll flex flex-col gap-4 divide-y">
-                    {comments
+                    {postState.post.comments
                       .sort((a, b) =>
                         a.createdAt.seconds < b.createdAt.seconds ? 1 : -1
                       )

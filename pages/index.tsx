@@ -13,7 +13,7 @@ import {
 import { useEffect, useState } from "react";
 
 export interface IPost {
-  id?: string;
+  id: string;
   caption: string;
   comments: {
     comment: string;
