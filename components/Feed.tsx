@@ -3,7 +3,6 @@ import Post from "./Post";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { IPost } from "../pages";
-import { v4 } from "uuid";
 
 const Feed = ({ posts }: { posts: IPost[] }) => {
   const { data: session } = useSession();
@@ -12,7 +11,7 @@ const Feed = ({ posts }: { posts: IPost[] }) => {
     <main className="min-h-screen pt-8 bg-slate-50 flex justify-center gap-8">
       <section className="w-[28rem]">
         {posts?.map((post) => (
-          <Post key={v4()} post={post} />
+          <Post key={post.id} post={post} />
         ))}
       </section>
       <section className="w-[20rem] h-fit hidden lg:flex items-center">

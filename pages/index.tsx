@@ -10,7 +10,6 @@ import {
   orderBy,
   Timestamp,
 } from "firebase/firestore";
-import { useState } from "react";
 
 export interface IPost {
   id: string;
@@ -45,8 +44,6 @@ export async function getServerSideProps() {
 }
 
 const Home: NextPage = ({ postsData }: any) => {
-  const [posts, setPosts] = useState<IPost[]>(postsData);
-
   return (
     <div>
       <Head>
@@ -56,7 +53,7 @@ const Home: NextPage = ({ postsData }: any) => {
       </Head>
 
       <Navbar />
-      <Feed posts={posts} />
+      <Feed posts={postsData} />
     </div>
   );
 };

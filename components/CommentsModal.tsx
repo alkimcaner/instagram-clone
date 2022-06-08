@@ -116,7 +116,7 @@ const CommentsModal = ({
                       )
                       .map((comment) => (
                         <Comment
-                          key={v4()}
+                          key={comment.id}
                           comment={comment}
                           dispatch={dispatch}
                         />
