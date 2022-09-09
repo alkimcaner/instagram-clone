@@ -102,6 +102,8 @@ const Post = ({ post }: { post: IPost }) => {
             alt=""
             layout="fill"
             objectFit="cover"
+            placeholder="blur"
+            blurDataURL="/placeholder.jpg"
           />
         )}
       </div>
