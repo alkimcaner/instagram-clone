@@ -2,7 +2,7 @@
 
 ### [Live demo](https://instagram-clone-flawn.vercel.app/)
 
-![gif](https://github.com/fl4wn/portfolio/blob/main/assets/project/instagram_banner.gif)
+![gif](https://github.com/fl4wn/portfolio/blob/main/public/assets/projects/instagram_banner.gif)
 
 ## Used Technologies
 
