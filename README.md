@@ -1,10 +1,8 @@
 # Instagram Clone
 
-### [Live demo](https://instagram-clone-flawn.vercel.app/)
+[Live demo](https://instagram-clone-flawn.vercel.app/)
 
-![gif](https://github.com/fl4wn/portfolio/blob/main/public/assets/projects/instagram_banner.gif)
-
-## Used Technologies
+Built with:
 
 - Next.js
 - NextAuth.js
@@ -14,20 +12,40 @@
 - Tailwindcss
 - Headless UI
 
+## Screenshot
+
+![gif](https://github.com/fl4wn/portfolio/blob/main/public/assets/projects/instagram_banner.gif)
+
 ## Project Setup
 
 ### Install dependencies
 
-`yarn install` or `npm install`
+```bash
+npm install
+# or
+yarn install
+```
 
 ### Start dev server
 
-`yarn dev` or `npm run dev`
+```bash
+npm run dev
+# or
+yarn dev
+```
 
 ### Build for production
 
-`yarn build` or `npm run build`
+```bash
+npm run build
+# or
+yarn build
+```
 
 ### Start Node.js server
 
-`yarn start` or `npm run start`
+```bash
+npm run start
+# or
+yarn start
+```
