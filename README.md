@@ -1,6 +1,6 @@
 # Instagram Clone
 
-[Live demo](https://instagram-clone-flawn.vercel.app/)
+[Live demo](https://instagram-clone.alkimcaner.com/)
 
 Built with:
 
@@ -14,7 +14,7 @@ Built with:
 
 ## Screenshot
 
-![gif](https://github.com/fl4wn/portfolio/blob/main/public/assets/projects/instagram_banner.gif)
+![gif](https://github.com/alkimcaner/portfolio/blob/main/public/assets/instagram.gif)
 
 ## Project Setup
 
