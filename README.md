@@ -1,6 +1,6 @@
 # Instagram Clone
 
-[Live demo](https://instagram-clone-flawn.vercel.app/)
+[Live demo](https://instagram-clone-alkimcaner.vercel.app/)
 
 Built with:
 
