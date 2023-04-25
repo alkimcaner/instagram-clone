@@ -14,7 +14,7 @@ Built with:
 
 ## Screenshot
 
-![gif](https://github.com/alkimcaner/portfolio/blob/main/public/assets/instagram.gif)
+![image](https://user-images.githubusercontent.com/17219339/234253896-8fa6a95b-a222-4d07-886f-0678b7130140.png)
 
 ## Project Setup
 
